@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App 2025</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Background Video -->
+    <video autoplay muted loop id="bg-video">
+        <source src="weather.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+
+    <!-- Content Container -->
+    <div class="container">
+        <h1>Welcome dear sir/maam</h1>
+
+        <select id="city-select">
+            <option>Select your city</option>
+            <option>Delhi</option>
+            <option>Mumbai</option>
+            <option>Bengaluru</option>
+            <option>Chennai</option>
+            <option>Kolkata</option>
+            <option>Hyderabad</option>
+            <option>Pune</option>
+            <option>Ahmedabad</option>
+            <option>Jaipur</option>
+            <option>Surat</option>
+            <option>Lucknow</option>
+            <option>Kanpur</option>
+            <option>Nagpur</option>
+            <option>Indore</option>
+            <option>Bhopal</option>
+            <option>Patna</option>
+            <option>Ranchi</option>
+            <option>Guwahati</option>
+            <option>Chandigarh</option>
+            <option>Dehradun</option>
+            <option>Haridwar</option>
+            <option>Varanasi</option>
+            <option>Agra</option>
+            <option>Meerut</option>
+            <option>Thiruvananthapuram</option>
+            <option>Kochi</option>
+            <option>Coimbatore</option>
+            <option>Madurai</option>
+            <option>Visakhapatnam</option>
+            <option>Vijayawada</option>
+            <option>Raipur</option>
+            <option>Bhubaneswar</option>
+            <option>Jodhpur</option>
+            <option>Udaipur</option>
+            <option>Amritsar</option>
+            <option>Ludhiana</option>
+            <option>Srinagar</option>
+            <option>Shimla</option>
+            <option>Panaji</option>
+            <option>Imphal</option>
+        </select>
+
+        <button onclick="getWeather()">Click here</button>
+
+        <div class="info">
+            <p><strong>Weather Climate:</strong> <span id="weather"></span></p>
+            <p><strong>Weather Description:</strong> <span id="description"></span></p>
+            <p><strong>Temperature (°C):</strong> <span id="temperature"></span></p>
+            <p><strong>Pressure:</strong> <span id="pressure"></span></p>
+            <p><strong>Humidity:</strong> <span id="humidity"></span></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

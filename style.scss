@@ -1,0 +1,86 @@
+/* Add to the end of the existing CSS */
+
+/* Load More System */
+.load {
+  display: none;
+}
+
+.load:checked + label + input + .load-panel {
+  right: 0;
+}
+
+.load:checked + label {
+  width: calc(100% - 420px);
+}
+
+.load:checked + label::after {
+  opacity: 1;
+  left: 0;
+}
+
+.load-panel {
+  position: absolute;
+  right: -520px;
+  width: 300px;
+  top: 0;
+  height: 100vh;
+  transition: all 0.2s;
+  color: black;
+  background: white;
+  padding: 10px 60px 0px 60px;
+  overflow: scroll;
+}
+
+.load-content {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.load-content a {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0 2px 5px 0px;
+  border-bottom: 2px solid;
+  transition: all 0.2s;
+  position: relative;
+  left: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.load-content a:hover {
+  padding: 0 10px 5px 10px;
+  left: -1px;
+}
+
+/* Planet-specific colors for Load More links */
+.mercury .load-content a { color: #E8927C; }
+.venus .load-content a { color: #b45d15; }
+.earth .load-content a { color: #26daaa; }
+.mars .load-content a { color: #e55f45; }
+.jupiter .load-content a { color: orange; }
+.saturn .load-content a { color: #b29d81; }
+.uranus .load-content a { color: #8dcdd8; }
+.neptune .load-content a { color: #4f83e2; }
+.pluto .load-content a { color: #FF8732; }
+
+/* Close button in additional panels */
+.load-panel label a {
+  color: #fabfad;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0 2px 5px 0px;
+  border-bottom: 2px solid;
+  transition: all 0.2s;
+  position: relative;
+  left: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.load-panel label a:hover {
+  padding: 0 10px 5px 10px;
+  left: -1px;
+}

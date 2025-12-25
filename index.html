@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🚀 Explore Space. Monitor Weather. All in One Place.</title>
+  <style>
+    /* Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #0a0a0a;
+      color: #e3c9b8;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Container & Layout */
+    main {
+      flex: 1;
+      display: grid;
+      gap: 32px;
+      padding: 32px;
+    }
+
+    /* Responsive layout */
+    @media (max-width: 766px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (min-width: 767px) and (max-width: 1439px) {
+      main {
+        grid-template-columns: 1fr 2fr 1fr;
+        align-items: start;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+    }
+    @media (min-width: 1440px) {
+      main {
+        grid-template-columns: 1fr 2fr 1fr;
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 48px 64px;
+      }
+    }
+
+    /* Header */
+    header {
+      background-color: #0a0a0a;
+      border-bottom: 1px solid #2e2e2e;
+      padding: 16px 32px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-weight: 700;
+      color: #e3c9b8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.25rem;
+    }
+
+    .logo-icon {
+      font-size: 1.5rem;
+      color: #f9a68a;
+    }
+
+    nav a {
+      margin-left: 24px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #c0a18e;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+    nav a:hover, nav a:focus {
+      background-color: #2e2e2e;
+      outline: none;
+    }
+    nav .btn-login {
+      background: linear-gradient(135deg, #f18674, #f9a68a);
+      color: #000;
+      font-weight: 700;
+    }
+
+    /* Left panel - form */
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .form-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+    }
+    .form-title .icon-rocket {
+      font-size: 2.8rem;
+      vertical-align: middle;
+      margin-left: 8px;
+      color: #f9a68a;
+    }
+
+    /* Center panel - 3D planets container */
+    .planets-container {
+      perspective: 1200px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    .planet {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.9);
+      cursor: pointer;
+      background-position: center;
+      background-size: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .planet:hover, .planet:focus {
+      transform: scale(1.1);
+      outline: none;
+    }
+
+    .planet-label {
+      position: absolute;
+      bottom: -28px;
+      width: 100%;
+      text-align: center;
+      color: #dab383;
+      font-weight: 700;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+
+    /* Sun special scaling */
+    .planet.sun {
+      width: 160px;
+      height: 160px;
+      box-shadow: 0 0 48px 12px rgba(255, 180, 70, 0.9);
+      cursor: default;
+    }
+    .planet.sun:hover {
+      transform: scale(1.15);
+    }
+
+    /* Right panel - planet info */
+    .info-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 380px;
+      color: #bda686;
+    }
+    .info-planet-img {
+      width: 100%;
+      max-width: 280px;
+      margin: 0 auto;
+      border-radius: 50%;
+      box-shadow: 0 10px 30px rgba(255, 255, 255 / 0.1);
+      background-position: center;
+      background-size: cover;
+    }
+
+    .info-planet-name {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #e3c9b8;
+    }
+    .info-planet-accent {
+      font-weight: 500;
+      color: #f9a68a;
+      margin-bottom: 12px;
+    }
+
+    .info-description {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #a59484;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #0a0a0a;
+      border-top: 1px solid #2e2e2e;
+      padding: 16px 32px;
+      font-size: 0.85rem;
+      color: #6a5f57;
+      text-align: center;
+    }
+
+    /* Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      border: 0;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet" />
+</head>
+<body>
+
+<header>
+  <a href="#" class="logo" aria-label="Dreamair home">
+    <span class="material-icons logo-icon" aria-hidden="true">rocket_launch</span> Explore space
+  </a>
+  <nav aria-label="Primary navigation">
+    <a href="template.html" aria-current="page">Space Explore</a>
+    <a href="earth.html">Earth </a>
+    <a href="weather.html" class="btn-forecast">Forecast</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Left form panel -->
+  <section class="form-section" aria-labelledby="form-title">
+    <h1 id="form-title" class="form-title">
+      🚀 Explore Space. Monitor Weather. All in One Place.
+      <span class="material-icons icon-rocket" aria-hidden="true">rocket_launch</span>
+    </h1>
+  </section>
+
+  <!-- Center planets 3D container -->
+  <section class="planets-container" aria-label="Planets with prices">
+    <div class="planet" tabindex="0" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9b4ddb2a-9679-470b-bc44-c4e39a3124f0.png');" aria-describedby="moon-desc">
+      <div class="planet-label">Moon</div>
+    </div>
+    <div class="planet" tabindex="0" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/52e796e3-2317-4ee5-b8f7-bf012c1d3e52.png');" aria-describedby="earth-desc">
+      <div class="planet-label">Earth</div>
+    </div>
+    <div class="planet sun" tabindex="0" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/667996b0-7d7c-405d-9472-9c0786a2815f.png');" aria-describedby="sun-desc">
+      <div class="planet-label">Sun</div>
+    </div>
+    <div class="planet" tabindex="0" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/091b4b92-1561-4775-a844-491a9c9b6392.png');" aria-describedby="mars-desc">
+      <div class="planet-label">Mars</div>
+    </div>
+    <div class="planet" tabindex="0" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a4ac9344-9da8-4d19-9325-4cd80e2f774b.png');" aria-describedby="venus-desc">
+      <div class="planet-label">Venus</div>
+    </div>
+    <div class="planet" tabindex="0" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/961a02ec-49aa-48be-9927-02588dc5b12a.png');" aria-describedby="jupiter-desc">
+      <div class="planet-label">Jupiter</div>
+    </div>
+  </section>
+
+  <!-- Right info panel -->
+  <section class="info-section" aria-live="polite" aria-atomic="true" aria-label="Planet information details">
+    <div class="info-planet-img" id="info-planet-img" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0f7a3664-7cd0-47fb-99d3-1ff2e0d8c246.png');" role="img" aria-label="Image of the Moon"></div>
+    <h2 class="info-planet-name" id="info-planet-name">Moon</h2>
+    <div class="info-planet-accent">Dream space</div>
+    <p class="info-description" id="info-desc">
+      The Moon is Earth's only natural satellite. It orbits at an average distance of 384,400 km, about 30 times Earth's diameter. The Moon always presents the same side to Earth because gravitational pull has locked its rotation to the planet.
+    </p>
+  </section>
+</main>
+
+<footer>
+  &copy; 2025 🚀 Explore Space. Monitor Weather. All in One Place.All rights reserved.
+</footer>
+
+<script>
+  // Planet data for dynamic info panel updates
+  const planetDetails = {
+    Moon: {
+      img: 'https://placehold.co/280x280?text=Moon&font=roboto',
+      name: 'Moon',
+      accent: 'Dream space',
+      desc: "The Moon is Earth's only natural satellite. It orbits at an average distance of 384,400 km, about 30 times Earth's diameter. The Moon always presents the same side to Earth because gravitational pull has locked its rotation to the planet."
+    },
+    Earth: {
+      img: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/07104651-7e8d-425d-975e-2e4550cc8c3b.png',
+      name: 'Earth',
+      accent: 'Blue planet',
+      desc: "Earth, our home, is the third planet from the Sun. It supports life with its breathable atmosphere and vast oceans. Ideal destination for space travelers looking for a familiar environment."
+    },
+    Sun: {
+      img: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1c74613a-197d-4e9a-9079-350249169dfb.png',
+      name: 'Sun',
+      accent: 'Shining star',
+      desc: "The Sun is the star at the center of our solar system. It provides light and heat to planets. Extreme conditions make it a breathtaking yet dangerous destination."
+    },
+    Mars: {
+      img: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5f58c260-1d56-4cf4-9bf6-df85256d7c8a.png',
+      name: 'Mars',
+      accent: 'Red planet',
+      desc: "Mars is the fourth planet from the Sun, known as the Red Planet due to its iron oxide surface. It's a popular destination for exploration and future colonization."
+    },
+    Venus: {
+      img: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/99205bf2-5064-4c5c-a391-be2054f0c2ff.png',
+      name: 'Venus',
+      accent: 'Morning star',
+      desc: "Venus is the second planet from the Sun. It has a thick, toxic atmosphere and surface temperatures hot enough to melt lead. A challenging yet fascinating target for exploration."
+    },
+    Jupiter: {
+      img: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/76cb0e9e-7a4e-4c81-9d28-bfb53ca3e8fe.png',
+      name: 'Jupiter',
+      accent: 'Gas giant',
+      desc: "Jupiter is the largest planet in our solar system, a gas giant with a massive magnetic field. A spectacular sight for travelers interested in massive storms and moons."
+    },
+  };
+
+  // Elements for updating planet info panel
+  const infoImg = document.getElementById('info-planet-img');
+  const infoName = document.getElementById('info-planet-name');
+  const infoAccent = document.querySelector('.info-planet-accent');
+  const infoDesc = document.getElementById('info-desc');
+
+  // The planets container & all planet elements
+  const planetsContainer = document.querySelector('.planets-container');
+  const planets = planetsContainer.querySelectorAll('.planet');
+
+  planets.forEach((planetEl) => {
+    planetEl.addEventListener('click', () => {
+      const planetName = planetEl.querySelector('.planet-label').textContent;
+      if (planetDetails[planetName]) {
+        updatePlanetInfo(planetDetails[planetName]);
+      }
+    });
+    planetEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const planetName = planetEl.querySelector('.planet-label').textContent;
+        if (planetDetails[planetName]) {
+          updatePlanetInfo(planetDetails[planetName]);
+        }
+      }
+    });
+  });
+
+  // Update right info panel with selected planet data
+  function updatePlanetInfo(planet) {
+    infoImg.style.backgroundImage = `url('${planet.img}')`;
+    infoImg.setAttribute('aria-label', `Image of ${planet.name}`);
+    infoName.textContent = planet.name;
+    infoAccent.textContent = planet.accent;
+    infoDesc.textContent = planet.desc;
+  }
+</script>
+</body>
+</html>
