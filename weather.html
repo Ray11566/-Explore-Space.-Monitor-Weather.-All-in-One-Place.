@@ -170,18 +170,18 @@
             animation: alertSlideIn 0.4s ease-out;
             backdrop-filter: blur(4px);
             border-left: 5px solid #2c3e50;
-}
+        }
 
-.sunny-alert {
-    background: rgba(243, 156, 18, 0.9);
-    border-left: 5px solid #d35400;
-}
+        .sunny-alert {
+            background: rgba(243, 156, 18, 0.9);
+            border-left: 5px solid #d35400;
+        }
 
-.wind-alert {
-    background: rgba(192, 57, 43, 0.9);
-    border-left: 5px solid #922b21;
-}
-    
+        .wind-alert {
+            background: rgba(192, 57, 43, 0.9);
+            border-left: 5px solid #922b21;
+        }
+        
         @keyframes alertSlideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -339,7 +339,10 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const API_KEY = "3c69c63936b72e93fdb8c4a191ad5219"; // Using the provided API key
+            // Use proxy server instead of direct API key
+            // Change this URL to your deployed proxy server
+            const PROXY_SERVER_URL = 'http://localhost:3000/api/weather'; // Local development
+            // const PROXY_SERVER_URL = 'https://your-proxy-server.vercel.app/api/weather'; // Deployed
             
             // Initialize map
             const map = L.map('map').setView([20.5937, 78.9629], 5);
@@ -347,12 +350,13 @@
                 attribution: '© OpenStreetMap'
             }).addTo(map);
 
-            // Weather layers configuration
+            // Weather layers configuration - Note: These layers won't work without API key
+            // You'll need to create separate proxy endpoints for these
             const weatherLayers = {
-                temp: L.tileLayer(`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${API_KEY}`),
-                clouds: L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${API_KEY}`),
-                precipitation: L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`),
-                wind: L.tileLayer(`https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${API_KEY}`)
+                temp: null,
+                clouds: null,
+                precipitation: null,
+                wind: null
             };
 
             // Cities coordinates
@@ -426,13 +430,14 @@
                     .on('click', () => updateWeather(city, coords.lat, coords.lon));
             });
 
-            // Layer controls
+            // Layer controls - disabled for now as they require API key
             document.querySelectorAll('.layer-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    Object.values(weatherLayers).forEach(layer => map.removeLayer(layer));
-                    weatherLayers[this.dataset.layer].addTo(map);
+                    
+                    // Show message that layers require proxy server
+                    showAlert('Weather layers require proxy server setup. See documentation.');
                 });
             });
 
@@ -463,42 +468,103 @@
                         const lat = position.coords.latitude;
                         const lon = position.coords.longitude;
                         map.flyTo([lat, lon], 10);
-                        fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`)
+                        
+                        // Use proxy server for reverse geocoding
+                        fetch(`${PROXY_SERVER_URL}?lat=${lat}&lon=${lon}`)
                             .then(response => response.json())
-                            .then(data => updateWeather(data[0].name, lat, lon));
+                            .then(data => {
+                                if (data.success) {
+                                    updateWeatherByCoords(lat, lon);
+                                } else {
+                                    showError("Failed to get location name");
+                                }
+                            })
+                            .catch(() => {
+                                updateWeatherByCoords(lat, lon);
+                            });
                     }, showError);
                 } else {
                     showError("Geolocation not supported");
                 }
             });
 
-            // Weather update function
+            // Weather update function using proxy server
             async function updateWeather(city, lat, lon) {
                 try {
-                    const response = await fetch(
-                        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`
-                    );
-                    const data = await response.json();
+                    const params = new URLSearchParams();
+                    if (city) params.append('city', city);
+                    if (lat && lon) {
+                        params.append('lat', lat);
+                        params.append('lon', lon);
+                    }
 
-                    document.querySelector('.city-name').textContent = city;
-                    document.getElementById('weather').textContent = data.weather[0].main;
-                    document.getElementById('description').textContent = data.weather[0].description;
-                    document.getElementById('temp-value').textContent = `${Math.round(data.main.temp - 273.15)} °C`;
-                    document.getElementById('feels-like').textContent = `${Math.round(data.main.feels_like - 273.15)} °C`;
-                    document.getElementById('humidity').textContent = `${data.main.humidity} %`;
-                    document.getElementById('pressure').textContent = `${data.main.pressure} hPa`;
-                    document.getElementById('wind-speed').textContent = `${data.wind.speed} m/s`;
-                    document.getElementById('visibility').textContent = `${(data.visibility / 1000).toFixed(1)} km`;
-                    document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+                    const response = await fetch(`${PROXY_SERVER_URL}?${params}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                        }
+                    });
 
-                    const sunrise = new Date(data.sys.sunrise * 1000);
-                    const sunset = new Date(data.sys.sunset * 1000);
-                    document.getElementById('sunset').textContent = sunset.toLocaleTimeString();
-                    showUmbrellaAlert(city, data.weather[0].main);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const data = result.data;
+                        updateWeatherUI(city, data);
+                    } else {
+                        showError(result.error || 'Failed to fetch weather data');
+                    }
 
                 } catch (error) {
-                    showError("Failed to fetch weather data");
+                    console.error('Weather fetch error:', error);
+                    
+                    // Fallback: Try direct API (not recommended for production)
+                    // showError('Proxy server not available. Please setup proxy server.');
+                    
+                    // For demo purposes only - remove this in production
+                    showError('Weather service temporarily unavailable. Please setup proxy server.');
                 }
+            }
+
+            // Update weather using coordinates only
+            async function updateWeatherByCoords(lat, lon) {
+                try {
+                    const response = await fetch(`${PROXY_SERVER_URL}?lat=${lat}&lon=${lon}`);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const data = result.data;
+                        updateWeatherUI(data.name, data);
+                    } else {
+                        showError(result.error || 'Failed to fetch weather data');
+                    }
+                } catch (error) {
+                    showError('Network error. Please try again.');
+                }
+            }
+
+            // Update UI with weather data
+            function updateWeatherUI(city, data) {
+                document.querySelector('.city-name').textContent = city;
+                document.getElementById('weather').textContent = data.weather[0].main;
+                document.getElementById('description').textContent = data.weather[0].description;
+                document.getElementById('temp-value').textContent = `${Math.round(data.main.temp - 273.15)} °C`;
+                document.getElementById('feels-like').textContent = `${Math.round(data.main.feels_like - 273.15)} °C`;
+                document.getElementById('humidity').textContent = `${data.main.humidity} %`;
+                document.getElementById('pressure').textContent = `${data.main.pressure} hPa`;
+                document.getElementById('wind-speed').textContent = `${data.wind.speed} m/s`;
+                document.getElementById('visibility').textContent = `${(data.visibility / 1000).toFixed(1)} km`;
+                document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+
+                const sunrise = new Date(data.sys.sunrise * 1000);
+                const sunset = new Date(data.sys.sunset * 1000);
+                document.getElementById('sunrise').textContent = sunrise.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                document.getElementById('sunset').textContent = sunset.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                showUmbrellaAlert(city, data.weather[0].main);
             }
 
             // Error handling
@@ -508,6 +574,15 @@
                 errorDiv.textContent = message;
                 document.body.appendChild(errorDiv);
                 setTimeout(() => errorDiv.remove(), 5000);
+            }
+
+            // Show informational alert
+            function showAlert(message) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'weather-alert';
+                alertDiv.innerHTML = message;
+                document.body.appendChild(alertDiv);
+                setTimeout(() => alertDiv.remove(), 3000);
             }
 
             // Function to show weather alerts based on conditions
@@ -556,9 +631,6 @@
                     setTimeout(() => alertDiv.remove(), 8000);
                 }
             }
-
-            // Add temperature layer by default
-            weatherLayers.temp.addTo(map);
 
             // Initial load - fetch Delhi weather immediately
             updateWeather('Delhi', cities['Delhi'].lat, cities['Delhi'].lon);
